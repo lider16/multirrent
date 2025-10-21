@@ -36,6 +36,7 @@ class AppConstants {
   static const String haveAccountText = '¿Ya tienes cuenta?';
   static const String switchToRegister = 'Regístrate';
   static const String switchToLogin = 'Inicia Sesión';
+  static const String logoutButton = 'Cerrar Sesión';
 
   // Textos de Inventario
   static const String inventoryScreenTitle = 'Inventario';

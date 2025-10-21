@@ -5,7 +5,6 @@ import '../controllers/product_provider.dart';
 import '../models/product_model.dart';
 import '../widgets/common/base_button.dart';
 import '../widgets/common/base_text_field.dart';
-import '../widgets/common/product_dialog.dart';
 
 class InventoryScreen extends StatefulWidget {
   const InventoryScreen({super.key});
@@ -83,37 +82,6 @@ class _InventoryScreenState extends State<InventoryScreen> {
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
-    }
-  }
-
-  Future<void> _editProduct(Product product) async {
-    final result = await showDialog<Product>(
-      context: context,
-      builder: (context) => ProductDialog(
-        product: product,
-        onSave: (updatedProduct) => updatedProduct,
-      ),
-    );
-
-    if (result != null) {
-      final productProvider = Provider.of<ProductProvider>(
-        context,
-        listen: false,
-      );
-      final success = await productProvider.updateProduct(result);
-
-      if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Producto actualizado exitosamente')),
-        );
-      } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(productProvider.errorMessage ?? 'Error desconocido'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
     }
   }
 
@@ -361,16 +329,6 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.end,
                                         children: [
-                                          IconButton(
-                                            icon: Icon(
-                                              Icons.edit,
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.primary,
-                                            ),
-                                            onPressed: () =>
-                                                _editProduct(product),
-                                          ),
                                           IconButton(
                                             icon: Icon(
                                               Icons.delete,

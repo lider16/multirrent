@@ -76,11 +76,15 @@ class ProductProvider with ChangeNotifier {
         stock: stock,
       );
 
-      await _productService.addProduct(newProduct);
+      final addedProduct = await _productService.addProduct(newProduct);
+      _products.insert(
+        0,
+        addedProduct,
+      ); // Agregar al inicio para mantener orden
       _isLoading = false;
       notifyListeners();
       AppLogger.info(
-        '[ProductProvider] Producto agregado exitosamente: ${newProduct.id}',
+        '[ProductProvider] Producto agregado exitosamente: ${addedProduct.id}',
       );
       return true;
     } catch (e) {
@@ -101,7 +105,11 @@ class ProductProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      await _productService.updateProduct(product);
+      final updatedProduct = await _productService.updateProduct(product);
+      final index = _products.indexWhere((p) => p.id == product.id);
+      if (index != -1) {
+        _products[index] = updatedProduct;
+      }
       _isLoading = false;
       notifyListeners();
       AppLogger.info(
@@ -127,6 +135,7 @@ class ProductProvider with ChangeNotifier {
 
     try {
       await _productService.deleteProduct(productId);
+      _products.removeWhere((p) => p.id == productId);
       _isLoading = false;
       notifyListeners();
       AppLogger.info(
