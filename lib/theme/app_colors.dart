@@ -14,6 +14,7 @@ class AppColors {
   // Tema oscuro - Acientos
   static const Color primary = Color(0xFFBB86FC);
   static const Color primaryVariant = Color(0xFF3700B3);
+  static const Color primaryStrong = Color(0xFF3700B3);
   static const Color secondary = Color(0xFF03DAC6);
   static const Color error = Color(0xFFCF6679);
 

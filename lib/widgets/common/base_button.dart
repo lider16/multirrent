@@ -11,6 +11,7 @@ class BaseButton extends StatelessWidget {
     this.isLoading = false,
     this.width,
     this.height,
+    this.fontSize,
   });
 
   final String text;
@@ -19,12 +20,13 @@ class BaseButton extends StatelessWidget {
   final bool isLoading;
   final double? width;
   final double? height;
+  final double? fontSize;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: width ?? double.infinity,
-      height: height ?? 48,
+      height: height ?? AppConstants.buttonHeight,
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: _getButtonStyle(),
@@ -43,7 +45,7 @@ class BaseButton extends StatelessWidget {
                 text,
                 style: TextStyle(
                   color: AppColors.onPrimary,
-                  fontSize: 16,
+                  fontSize: fontSize ?? AppConstants.buttonFontSize,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -68,6 +70,10 @@ class BaseButton extends StatelessWidget {
         backgroundColor = AppColors.error;
         foregroundColor = AppColors.onError;
         break;
+      case ButtonType.strongPrimary:
+        backgroundColor = AppColors.primaryStrong;
+        foregroundColor = AppColors.onPrimary;
+        break;
     }
 
     return ElevatedButton.styleFrom(
@@ -82,4 +88,4 @@ class BaseButton extends StatelessWidget {
   }
 }
 
-enum ButtonType { primary, secondary, error }
+enum ButtonType { primary, secondary, error, strongPrimary }

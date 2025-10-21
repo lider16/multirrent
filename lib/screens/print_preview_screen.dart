@@ -60,16 +60,12 @@ class PrintPreviewScreen extends StatelessWidget {
                     children: [
                       pw.Text(
                         'Fecha: ${now.day}/${now.month}/${now.year}',
-                        style: const pw.TextStyle(
-                          fontSize: 12,
-                        ),
+                        style: const pw.TextStyle(fontSize: 12),
                       ),
                       if (orderId != null)
                         pw.Text(
                           'N° Orden: $orderId',
-                          style: const pw.TextStyle(
-                            fontSize: 12,
-                          ),
+                          style: const pw.TextStyle(fontSize: 12),
                         ),
                     ],
                   ),
@@ -222,9 +218,9 @@ class PrintPreviewScreen extends StatelessWidget {
       );
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al imprimir: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error al imprimir: $e')));
       }
     }
   }
@@ -237,7 +233,8 @@ class PrintPreviewScreen extends StatelessWidget {
       // En web, esto descargará el archivo automáticamente
       await Printing.sharePdf(
         bytes: bytes,
-        filename: '$orderType-${orderId ?? DateTime.now().millisecondsSinceEpoch}.pdf',
+        filename:
+            '$orderType-${orderId ?? DateTime.now().millisecondsSinceEpoch}.pdf',
       );
 
       if (context.mounted) {
@@ -247,9 +244,9 @@ class PrintPreviewScreen extends StatelessWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al guardar PDF: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error al guardar PDF: $e')));
       }
     }
   }
@@ -502,6 +499,9 @@ class PrintPreviewScreen extends StatelessWidget {
                     child: BaseButton(
                       text: 'Imprimir',
                       onPressed: () => _printDocument(context),
+                      height: AppConstants.buttonHeightLarge,
+                      fontSize: AppConstants.buttonFontSizeLarge,
+                      buttonType: ButtonType.strongPrimary,
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -509,6 +509,9 @@ class PrintPreviewScreen extends StatelessWidget {
                     child: BaseButton(
                       text: 'Guardar PDF',
                       onPressed: () => _savePdf(context),
+                      height: AppConstants.buttonHeightLarge,
+                      fontSize: AppConstants.buttonFontSizeLarge,
+                      buttonType: ButtonType.strongPrimary,
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -516,6 +519,9 @@ class PrintPreviewScreen extends StatelessWidget {
                     child: BaseButton(
                       text: 'Cerrar',
                       onPressed: () => Navigator.of(context).pop(),
+                      height: AppConstants.buttonHeightLarge,
+                      fontSize: AppConstants.buttonFontSizeLarge,
+                      buttonType: ButtonType.strongPrimary,
                     ),
                   ),
                 ],

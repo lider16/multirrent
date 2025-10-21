@@ -19,6 +19,12 @@ class AppConstants {
   static const double gridSpacing = 16.0;
   static const double screenPadding = 16.0;
 
+  // Tamaños de botones
+  static const double buttonHeight = 48.0;
+  static const double buttonHeightLarge = 62.0;
+  static const double buttonFontSize = 16.0;
+  static const double buttonFontSizeLarge = 21.0;
+
   // Textos de Login
   static const String loginTitle = 'Iniciar Sesión';
   static const String registerTitle = 'Registrarse';

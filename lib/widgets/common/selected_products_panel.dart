@@ -93,6 +93,9 @@ class SelectedProductsPanel extends StatelessWidget {
                   child: BaseButton(
                     text: isSaving ? 'Guardando...' : 'Cotización',
                     onPressed: isSaving ? null : onQuote,
+                    height: AppConstants.buttonHeightLarge,
+                    fontSize: AppConstants.buttonFontSizeLarge,
+                    buttonType: ButtonType.strongPrimary,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -100,6 +103,9 @@ class SelectedProductsPanel extends StatelessWidget {
                   child: BaseButton(
                     text: isSaving ? 'Guardando...' : 'Venta',
                     onPressed: isSaving ? null : onSale,
+                    height: AppConstants.buttonHeightLarge,
+                    fontSize: AppConstants.buttonFontSizeLarge,
+                    buttonType: ButtonType.strongPrimary,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -107,6 +113,9 @@ class SelectedProductsPanel extends StatelessWidget {
                   child: BaseButton(
                     text: isSaving ? 'Guardando...' : 'Venta Factura',
                     onPressed: isSaving ? null : onSaleWithInvoice,
+                    height: AppConstants.buttonHeightLarge,
+                    fontSize: AppConstants.buttonFontSizeLarge,
+                    buttonType: ButtonType.strongPrimary,
                   ),
                 ),
               ],
