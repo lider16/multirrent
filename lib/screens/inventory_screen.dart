@@ -5,6 +5,7 @@ import '../controllers/product_provider.dart';
 import '../models/product_model.dart';
 import '../widgets/common/base_button.dart';
 import '../widgets/common/base_text_field.dart';
+import '../widgets/common/product_dialog.dart';
 
 class InventoryScreen extends StatefulWidget {
   const InventoryScreen({super.key});
@@ -106,6 +107,91 @@ class _InventoryScreenState extends State<InventoryScreen> {
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
+    }
+  }
+
+  Future<void> _editProduct(Product product) async {
+    final result = await showDialog<Product>(
+      context: context,
+      builder: (context) => ProductDialog(
+        product: product,
+        onSave: (updatedProduct) => updatedProduct,
+      ),
+    );
+
+    if (result != null) {
+      final productProvider = Provider.of<ProductProvider>(
+        context,
+        listen: false,
+      );
+      final success = await productProvider.updateProduct(result);
+
+      if (success && mounted) {
+        // Recargar productos
+        productProvider.loadProducts().then((_) {
+          _filterProducts();
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Producto actualizado exitosamente')),
+        );
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(productProvider.errorMessage ?? 'Error desconocido'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _deleteProduct(Product product) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmar eliminación'),
+        content: Text(
+          '¿Estás seguro de que quieres eliminar "${product.name}"? Esta acción no se puede deshacer.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final productProvider = Provider.of<ProductProvider>(
+        context,
+        listen: false,
+      );
+      final success = await productProvider.deleteProduct(product.id);
+
+      if (success && mounted) {
+        // Recargar productos
+        productProvider.loadProducts().then((_) {
+          _filterProducts();
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Producto eliminado exitosamente')),
+        );
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(productProvider.errorMessage ?? 'Error desconocido'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
     }
   }
 
@@ -292,6 +378,33 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                             style: Theme.of(
                                               context,
                                             ).textTheme.bodyMedium,
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          IconButton(
+                                            icon: Icon(
+                                              Icons.edit,
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.primary,
+                                            ),
+                                            onPressed: () =>
+                                                _editProduct(product),
+                                          ),
+                                          IconButton(
+                                            icon: Icon(
+                                              Icons.delete,
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.error,
+                                            ),
+                                            onPressed: () =>
+                                                _deleteProduct(product),
                                           ),
                                         ],
                                       ),
