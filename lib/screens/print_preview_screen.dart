@@ -4,6 +4,8 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import '../constants/app_constants.dart';
 import '../models/selected_product.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_text_styles.dart';
 import '../widgets/common/base_button.dart';
 
 class PrintPreviewScreen extends StatelessWidget {
@@ -409,12 +411,28 @@ class PrintPreviewScreen extends StatelessWidget {
                         children: [
                           Expanded(
                             flex: 3,
-                            child: Text(
-                              item.product.name,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.black,
-                              ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item.product.name,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                if (item.product.description.isNotEmpty) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    item.product.description,
+                                    style: AppTextStyles.bodyMedium.copyWith(
+                                      color: AppColors.onSurface.withValues(
+                                        alpha: 0.7,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
                           ),
                           Expanded(
