@@ -22,8 +22,6 @@ class _InventoryScreenState extends State<InventoryScreen> {
   final _searchController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  List<Product> _filteredProducts = [];
-
   @override
   void initState() {
     super.initState();
@@ -33,14 +31,10 @@ class _InventoryScreenState extends State<InventoryScreen> {
         context,
         listen: false,
       );
-      productProvider.loadProducts().then((_) {
-        setState(() {
-          _filteredProducts = productProvider.products;
-        });
-      });
+      productProvider.loadProducts();
     });
 
-    _searchController.addListener(_filterProducts);
+    _searchController.addListener(() => setState(() {}));
   }
 
   @override
@@ -51,19 +45,6 @@ class _InventoryScreenState extends State<InventoryScreen> {
     _stockController.dispose();
     _searchController.dispose();
     super.dispose();
-  }
-
-  void _filterProducts() {
-    final query = _searchController.text.toLowerCase();
-    final productProvider = Provider.of<ProductProvider>(
-      context,
-      listen: false,
-    );
-    setState(() {
-      _filteredProducts = productProvider.products
-          .where((product) => product.name.toLowerCase().contains(query))
-          .toList();
-    });
   }
 
   Future<void> _addProduct() async {
@@ -91,11 +72,6 @@ class _InventoryScreenState extends State<InventoryScreen> {
       _descriptionController.clear();
       _priceController.clear();
       _stockController.clear();
-
-      // Recargar productos para actualizar la lista
-      productProvider.loadProducts().then((_) {
-        _filterProducts();
-      });
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Producto agregado exitosamente')),
@@ -127,10 +103,6 @@ class _InventoryScreenState extends State<InventoryScreen> {
       final success = await productProvider.updateProduct(result);
 
       if (success && mounted) {
-        // Recargar productos
-        productProvider.loadProducts().then((_) {
-          _filterProducts();
-        });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Producto actualizado exitosamente')),
         );
@@ -177,10 +149,6 @@ class _InventoryScreenState extends State<InventoryScreen> {
       final success = await productProvider.deleteProduct(product.id);
 
       if (success && mounted) {
-        // Recargar productos
-        productProvider.loadProducts().then((_) {
-          _filterProducts();
-        });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Producto eliminado exitosamente')),
         );
@@ -198,6 +166,13 @@ class _InventoryScreenState extends State<InventoryScreen> {
   @override
   Widget build(BuildContext context) {
     final productProvider = Provider.of<ProductProvider>(context);
+    final filteredProducts = productProvider.products
+        .where(
+          (product) => product.name.toLowerCase().contains(
+            _searchController.text.toLowerCase(),
+          ),
+        )
+        .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -295,7 +270,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${AppConstants.inventoryListTitle} (${_filteredProducts.length})',
+                    '${AppConstants.inventoryListTitle} (${filteredProducts.length})',
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 16),
@@ -315,7 +290,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   ),
                   const SizedBox(height: 16),
                   Expanded(
-                    child: _filteredProducts.isEmpty
+                    child: filteredProducts.isEmpty
                         ? Center(
                             child: Text(
                               _searchController.text.isEmpty
@@ -325,9 +300,9 @@ class _InventoryScreenState extends State<InventoryScreen> {
                             ),
                           )
                         : ListView.builder(
-                            itemCount: _filteredProducts.length,
+                            itemCount: filteredProducts.length,
                             itemBuilder: (context, index) {
-                              final product = _filteredProducts[index];
+                              final product = filteredProducts[index];
                               return Card(
                                 color: Theme.of(context).cardColor,
                                 margin: const EdgeInsets.only(bottom: 8),
