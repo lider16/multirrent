@@ -137,9 +137,24 @@ class PrintPreviewScreen extends StatelessWidget {
                       children: [
                         pw.Padding(
                           padding: const pw.EdgeInsets.all(8),
-                          child: pw.Text(
-                            item.product.name,
-                            style: const pw.TextStyle(fontSize: 11),
+                          child: pw.Column(
+                            crossAxisAlignment: pw.CrossAxisAlignment.start,
+                            children: [
+                              pw.Text(
+                                item.product.name,
+                                style: const pw.TextStyle(fontSize: 11),
+                              ),
+                              if (item.product.description.isNotEmpty) ...[
+                                pw.SizedBox(height: 2),
+                                pw.Text(
+                                  item.product.description,
+                                  style: pw.TextStyle(
+                                    fontSize: 10,
+                                    color: PdfColors.grey700,
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                         ),
                         pw.Padding(
