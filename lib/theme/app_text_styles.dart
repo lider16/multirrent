@@ -29,4 +29,9 @@ class AppTextStyles {
     color: AppColors.onSurface,
     fontSize: 14,
   );
+
+  static const TextStyle bodySmall = TextStyle(
+    color: AppColors.textSecondary,
+    fontSize: 12,
+  );
 }

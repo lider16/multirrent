@@ -26,4 +26,9 @@ class AppColors {
   // Tema oscuro - Bordes y sombras
   static const Color border = Color(0xFF3A3A3A);
   static const Color shadow = Color(0xFF000000);
+
+  // Colores para texto en fondo blanco (para pantallas de impresión/vista previa)
+  static const Color textPrimary = Colors.black;
+  static const Color textSecondary = Colors.black87;
+  static const Color textMuted = Colors.black54;
 }

@@ -5,6 +5,7 @@ import 'package:printing/printing.dart';
 import '../constants/app_constants.dart';
 import '../models/selected_product.dart';
 import '../widgets/common/base_button.dart';
+import '../theme/app_text_styles.dart';
 
 class PrintPreviewScreen extends StatelessWidget {
   final List<SelectedProduct> selectedProducts;
@@ -423,10 +424,7 @@ class PrintPreviewScreen extends StatelessWidget {
                                   const SizedBox(height: 2),
                                   Text(
                                     item.product.description,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.black54,
-                                    ),
+                                    style: AppTextStyles.bodySmall,
                                   ),
                                 ],
                               ],
