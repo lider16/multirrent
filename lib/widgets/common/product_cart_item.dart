@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_constants.dart';
 import '../../models/selected_product.dart';
+import '../../theme/app_colors.dart';
+import '../../theme/app_text_styles.dart';
 import 'base_text_field.dart';
 
 class ProductCartItem extends StatefulWidget {
@@ -106,7 +108,7 @@ class _ProductCartItemState extends State<ProductCartItem> {
                 Expanded(
                   child: Text(
                     widget.selectedProduct.product.name,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    style: AppTextStyles.titleLarge.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -117,6 +119,15 @@ class _ProductCartItemState extends State<ProductCartItem> {
                 ),
               ],
             ),
+            if (widget.selectedProduct.product.description.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                widget.selectedProduct.product.description,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.onSurface.withValues(alpha: 0.7),
+                ),
+              ),
+            ],
             const SizedBox(height: 8),
             // Campos editables
             Row(
