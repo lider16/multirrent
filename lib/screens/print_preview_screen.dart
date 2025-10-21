@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../constants/app_constants.dart';
 import '../models/selected_product.dart';
 import '../widgets/common/base_button.dart';
@@ -24,6 +26,7 @@ class PrintPreviewScreen extends StatelessWidget {
   Future<pw.Document> _generatePdf() async {
     final pdf = pw.Document();
     final now = DateTime.now();
+    final isInvoice = orderType == 'Factura Electrónica';
 
     pdf.addPage(
       pw.Page(
@@ -109,7 +112,18 @@ class PrintPreviewScreen extends StatelessWidget {
                       pw.Padding(
                         padding: const pw.EdgeInsets.all(8),
                         child: pw.Text(
-                          'Precio',
+                          'Precio sin IVA',
+                          style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                          textAlign: pw.TextAlign.center,
+                        ),
+                      ),
+                      pw.Padding(
+                        padding: const pw.EdgeInsets.all(8),
+                        child: pw.Text(
+                          'Precio con IVA',
                           style: pw.TextStyle(
                             fontWeight: pw.FontWeight.bold,
                             fontSize: 12,
@@ -132,7 +146,11 @@ class PrintPreviewScreen extends StatelessWidget {
                   ),
                   // Products
                   ...selectedProducts.map((item) {
-                    final itemTotal = item.quantity * item.unitPrice;
+                    final displayPrice = item.unitPrice;
+                    final displayTotal = item.quantity * displayPrice;
+                    final netPrice = isInvoice
+                        ? (item.unitPrice / 1.19)
+                        : item.unitPrice;
                     return pw.TableRow(
                       children: [
                         pw.Padding(
@@ -168,7 +186,7 @@ class PrintPreviewScreen extends StatelessWidget {
                         pw.Padding(
                           padding: const pw.EdgeInsets.all(8),
                           child: pw.Text(
-                            '\$${item.unitPrice.toStringAsFixed(2)}',
+                            '\$${netPrice.toStringAsFixed(2)}',
                             style: const pw.TextStyle(fontSize: 11),
                             textAlign: pw.TextAlign.center,
                           ),
@@ -176,7 +194,15 @@ class PrintPreviewScreen extends StatelessWidget {
                         pw.Padding(
                           padding: const pw.EdgeInsets.all(8),
                           child: pw.Text(
-                            '\$${itemTotal.toStringAsFixed(2)}',
+                            '\$${displayPrice.toStringAsFixed(2)}',
+                            style: const pw.TextStyle(fontSize: 11),
+                            textAlign: pw.TextAlign.center,
+                          ),
+                        ),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8),
+                          child: pw.Text(
+                            '\$${displayTotal.toStringAsFixed(2)}',
                             style: const pw.TextStyle(fontSize: 11),
                             textAlign: pw.TextAlign.center,
                           ),
@@ -267,9 +293,32 @@ class PrintPreviewScreen extends StatelessWidget {
     }
   }
 
+  Future<void> _copyToClipboard(BuildContext context, String text) async {
+    await Clipboard.setData(ClipboardData(text: text));
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Copiado al portapapeles')));
+    }
+  }
+
+  Future<void> _launchSII(BuildContext context) async {
+    final uri = Uri.parse(AppConstants.siiUrl);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No se pudo abrir la página del SII')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
+    final isInvoice = orderType == 'Factura Electrónica';
 
     return Scaffold(
       appBar: AppBar(
@@ -345,7 +394,7 @@ class PrintPreviewScreen extends StatelessWidget {
                   color: Colors.grey[100],
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
                     Expanded(
                       flex: 3,
@@ -373,7 +422,19 @@ class PrintPreviewScreen extends StatelessWidget {
                     Expanded(
                       flex: 1,
                       child: Text(
-                        'Precio',
+                        'Precio sin IVA',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          color: Colors.black,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Text(
+                        'Precio con IVA',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
@@ -406,7 +467,11 @@ class PrintPreviewScreen extends StatelessWidget {
                   itemCount: selectedProducts.length,
                   itemBuilder: (context, index) {
                     final item = selectedProducts[index];
-                    final itemTotal = item.quantity * item.unitPrice;
+                    final displayPrice = item.unitPrice;
+                    final displayTotal = item.quantity * displayPrice;
+                    final netPrice = isInvoice
+                        ? (item.unitPrice / 1.19)
+                        : item.unitPrice;
 
                     return Container(
                       padding: const EdgeInsets.symmetric(
@@ -425,30 +490,126 @@ class PrintPreviewScreen extends StatelessWidget {
                         children: [
                           Expanded(
                             flex: 3,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        item.product.name,
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      if (item
+                                          .product
+                                          .description
+                                          .isNotEmpty) ...[
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          item.product.description,
+                                          style: AppTextStyles.bodySmall,
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                                if (isInvoice)
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: IconButton(
+                                      icon: const Icon(
+                                        Icons.copy,
+                                        size: 16,
+                                        color: Colors.black,
+                                      ),
+                                      onPressed: () => _copyToClipboard(
+                                        context,
+                                        item.product.name,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  item.product.name,
+                                  item.quantity.toString(),
                                   style: const TextStyle(
                                     fontSize: 14,
                                     color: Colors.black,
                                   ),
+                                  textAlign: TextAlign.center,
                                 ),
-                                if (item.product.description.isNotEmpty) ...[
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    item.product.description,
-                                    style: AppTextStyles.bodySmall,
+                                if (isInvoice)
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: IconButton(
+                                      icon: const Icon(
+                                        Icons.copy,
+                                        size: 16,
+                                        color: Colors.black,
+                                      ),
+                                      onPressed: () => _copyToClipboard(
+                                        context,
+                                        item.quantity.toString(),
+                                      ),
+                                    ),
                                   ),
-                                ],
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  '\$${netPrice.toStringAsFixed(2)}',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                if (isInvoice)
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: IconButton(
+                                      icon: const Icon(
+                                        Icons.copy,
+                                        size: 16,
+                                        color: Colors.black,
+                                      ),
+                                      onPressed: () => _copyToClipboard(
+                                        context,
+                                        netPrice.toStringAsFixed(2),
+                                      ),
+                                    ),
+                                  ),
                               ],
                             ),
                           ),
                           Expanded(
                             flex: 1,
                             child: Text(
-                              item.quantity.toString(),
+                              '\$${displayPrice.toStringAsFixed(2)}',
                               style: const TextStyle(
                                 fontSize: 14,
                                 color: Colors.black,
@@ -459,18 +620,7 @@ class PrintPreviewScreen extends StatelessWidget {
                           Expanded(
                             flex: 1,
                             child: Text(
-                              '\$${item.unitPrice.toStringAsFixed(2)}',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.black,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: Text(
-                              '\$${itemTotal.toStringAsFixed(2)}',
+                              '\$${displayTotal.toStringAsFixed(2)}',
                               style: const TextStyle(
                                 fontSize: 14,
                                 color: Colors.black,
@@ -521,39 +671,74 @@ class PrintPreviewScreen extends StatelessWidget {
               const SizedBox(height: 32),
 
               // Action Buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: BaseButton(
-                      text: 'Imprimir',
-                      onPressed: () => _printDocument(context),
-                      height: AppConstants.buttonHeightLarge,
-                      fontSize: AppConstants.buttonFontSizeLarge,
-                      buttonType: ButtonType.strongPrimary,
+              if (isInvoice)
+                Row(
+                  children: [
+                    Expanded(
+                      child: BaseButton(
+                        text: 'Imprimir',
+                        onPressed: () => _printDocument(context),
+                        height: AppConstants.buttonHeightLarge,
+                        fontSize: AppConstants.buttonFontSizeLarge,
+                        buttonType: ButtonType.strongPrimary,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: BaseButton(
-                      text: 'Guardar PDF',
-                      onPressed: () => _savePdf(context),
-                      height: AppConstants.buttonHeightLarge,
-                      fontSize: AppConstants.buttonFontSizeLarge,
-                      buttonType: ButtonType.strongPrimary,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: BaseButton(
+                        text: 'Ir a SII',
+                        onPressed: () => _launchSII(context),
+                        height: AppConstants.buttonHeightLarge,
+                        fontSize: AppConstants.buttonFontSizeLarge,
+                        buttonType: ButtonType.strongPrimary,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: BaseButton(
-                      text: 'Cerrar',
-                      onPressed: () => Navigator.of(context).pop(),
-                      height: AppConstants.buttonHeightLarge,
-                      fontSize: AppConstants.buttonFontSizeLarge,
-                      buttonType: ButtonType.strongPrimary,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: BaseButton(
+                        text: 'Cerrar',
+                        onPressed: () => Navigator.of(context).pop(),
+                        height: AppConstants.buttonHeightLarge,
+                        fontSize: AppConstants.buttonFontSizeLarge,
+                        buttonType: ButtonType.strongPrimary,
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                )
+              else
+                Row(
+                  children: [
+                    Expanded(
+                      child: BaseButton(
+                        text: 'Imprimir',
+                        onPressed: () => _printDocument(context),
+                        height: AppConstants.buttonHeightLarge,
+                        fontSize: AppConstants.buttonFontSizeLarge,
+                        buttonType: ButtonType.strongPrimary,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: BaseButton(
+                        text: 'Guardar PDF',
+                        onPressed: () => _savePdf(context),
+                        height: AppConstants.buttonHeightLarge,
+                        fontSize: AppConstants.buttonFontSizeLarge,
+                        buttonType: ButtonType.strongPrimary,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: BaseButton(
+                        text: 'Cerrar',
+                        onPressed: () => Navigator.of(context).pop(),
+                        height: AppConstants.buttonHeightLarge,
+                        fontSize: AppConstants.buttonFontSizeLarge,
+                        buttonType: ButtonType.strongPrimary,
+                      ),
+                    ),
+                  ],
+                ),
             ],
           ),
         ),

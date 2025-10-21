@@ -52,4 +52,7 @@ class AppConstants {
   static const String stockLabel = 'Stock:';
   static const String currencySymbol = '\$';
   static const String unitsLabel = 'unidades';
+
+  // URLs
+  static const String siiUrl = 'https://www.sii.cl';
 }
